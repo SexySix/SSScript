@@ -1,0 +1,37 @@
+#!/usr/bin/env node
+'use strict';
+
+const fs = require('fs');
+const path = require('path');
+
+let basePath = process.cwd();
+
+let [, , dirName] = process.argv;
+
+const dirPath = path.join(basePath, dirName);
+const fileSet = new Set();
+
+if (dirName) {
+	fs.readdir(dirPath, function (err, fileNames) {
+		if (err) {
+			console.warn(err);
+		} else {
+			fileNames.forEach(function (fileName) {
+				let name = fileName;
+				if (name.indexOf('@') !== -1) {
+					name = name.split('@')[0];
+				}
+				if (name.indexOf('.') !== -1) {
+					name = name.split('.')[0];
+				}
+				fileSet.add(name);
+			});
+			const arr = Array.from(fileSet).map(function (name) {
+				return `${name}:require('./${dirName}/${name}.png')`;
+			});
+			console.log(`${dirName}:{${arr.join(',')}}`);
+		}
+	});
+} else {
+	console.warn('请输入文件夹名称');
+}
